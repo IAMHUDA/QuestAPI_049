@@ -1,4 +1,4 @@
-package com.example.resapi.viewmodel
+package com.example.resapi.ui.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
