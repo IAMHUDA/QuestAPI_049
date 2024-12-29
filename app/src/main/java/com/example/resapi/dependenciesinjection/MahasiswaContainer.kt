@@ -1,4 +1,4 @@
-package com.example.resapi.containerapp
+package com.example.resapi.dependenciesinjection
 
 import com.example.resapi.repository.MahasiswaRepository
 import com.example.resapi.repository.NetworkKontakRepository
@@ -8,12 +8,11 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 
-
 interface AppContainer{
     val kontakRepository: MahasiswaRepository
 }
 
-class MahasiswaContainer: AppContainer{
+class MahasiswaContainer: AppContainer {
     private val baseUrl = "http://10.0.2.2/umyTI/"
     private val json = Json { ignoreUnknownKeys = true }
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -21,7 +20,7 @@ class MahasiswaContainer: AppContainer{
         .baseUrl(baseUrl).build()
 
     private val mahasiswaService: MahasiswaService by lazy {
-        retrofit.create(mahasiswaService::class.java)
+        retrofit.create(MahasiswaService::class.java)
     }
 
     override val kontakRepository: MahasiswaRepository by lazy {

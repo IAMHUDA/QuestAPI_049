@@ -1,6 +1,7 @@
 package com.example.resapi.ui.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,10 +33,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,8 +51,11 @@ import com.example.resapi.R
 import com.example.resapi.model.Mahasiswa
 import com.example.resapi.ui.customwidget.CostumeTopAppBar
 import com.example.resapi.ui.navigation.DestinasiNavigasi
+import com.example.resapi.ui.viewmodel.HomeUiState
 import com.example.resapi.ui.viewmodel.HomeViewModel
-import com.example.resapi.ui.viewmodel.HomeuiState
+
+import com.example.resapi.ui.viewmodel.PenyediaViewModel
+import kotlinx.coroutines.delay
 
 object DestinasiHome : DestinasiNavigasi {
     override val route = "home"
@@ -51,12 +66,13 @@ object DestinasiHome : DestinasiNavigasi {
 @Composable
 fun HomeScreen(
     navigateToltemEntry: () -> Unit,
+    navigateToEdit: (String) -> Unit, // Parameter untuk navigasi edit
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit = {},
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
-){
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold (
+    Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CostumeTopAppBar(
@@ -69,15 +85,15 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton (
+            FloatingActionButton(
                 onClick = navigateToltemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
-            ){
+            ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Kontak")
             }
         },
-    ){ innerPadding ->
+    ) { innerPadding ->
         HomeStatus(
             homeUiState = viewModel.mhsUiState,
             retryAction = { viewModel.getMhs() },
@@ -86,22 +102,26 @@ fun HomeScreen(
             onDeleteClick = {
                 viewModel.deleteMhs(it.nim)
                 viewModel.getMhs()
-            }
+            },
+            onEditClick = navigateToEdit // Pass the edit function here
         )
     }
 }
 
+
+
 @Composable
 fun HomeStatus(
-    homeUiState: HomeuiState,
+    homeUiState: HomeUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit,
     onDeleteClick: (Mahasiswa) -> Unit = {},
-){
+    onEditClick: (String) -> Unit = {} // Parameter untuk edit
+) {
     when (homeUiState) {
-        is HomeuiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
-        is HomeuiState.Success ->
+        is HomeUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
+        is HomeUiState.Success -> {
             if (homeUiState.mahasiswa.isEmpty()) {
                 return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Tidak ada data Kontak")
@@ -110,51 +130,44 @@ fun HomeStatus(
                 MhsLayout(
                     mahasiswa = homeUiState.mahasiswa,
                     modifier = modifier.fillMaxWidth(),
-                    onDetailClick = {
-                        onDetailClick(it.nim)
-                    },
-                    onDeleteClick = {
-                        onDeleteClick(it)
-                    }
+                    onDetailClick = { onDetailClick(it.nim) },
+                    onDeleteClick = { onDeleteClick(it) },
+                    onEditClick = onEditClick // Pass the edit function
                 )
             }
-        is HomeuiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
+        }
+        is HomeUiState.Error -> OnError(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
-
 @Composable
-fun OnLoading(modifier: Modifier = Modifier) {
+fun OnLoading(modifier: Modifier = Modifier, duration: Long = 1000000000L) {
+
+    LaunchedEffect(Unit) {
+
+        delay(duration)
+    }
+
+    // Menampilkan gambar loading
     Image(
         modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading),
+        painter = painterResource(R.drawable.loadingg),
         contentDescription = stringResource(R.string.loading)
     )
 }
 
+
 @Composable
-fun OnError(
-    retryAction: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun OnError(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    )  {
         Image(
-            painter = painterResource(id = R.drawable.connection_error),
-            contentDescription = ""
+            painter = painterResource(id = R.drawable.loading),
+            contentDescription = stringResource(R.string.loading_failed)
         )
-        Text(
-            text = stringResource(R.string.loading_failed),
-            modifier = Modifier.padding(16.dp)
-        )
-        Button(
-            onClick = retryAction
-        ) {
-            Text(stringResource(R.string.retry))
-        }
     }
 }
 
@@ -163,7 +176,8 @@ fun MhsLayout(
     mahasiswa: List<Mahasiswa>,
     modifier: Modifier = Modifier,
     onDetailClick: (Mahasiswa) -> Unit,
-    onDeleteClick: (Mahasiswa) -> Unit = {}
+    onDeleteClick: (Mahasiswa) -> Unit = {},
+    onEditClick: (String) -> Unit = {} // Parameter untuk edit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -176,60 +190,82 @@ fun MhsLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onDetailClick(kontak) },
-                onDeleteClick = {
-                    onDeleteClick(kontak)
-                }
+                onDeleteClick = { onDeleteClick(kontak) },
+                onEditClick = { onEditClick(kontak.nim) } // Call the edit function
             )
         }
     }
 }
-
-
 
 
 @Composable
 fun MhsCard(
     mahasiswa: Mahasiswa,
     modifier: Modifier = Modifier,
-    onDeleteClick: (Mahasiswa) -> Unit = {}
+    onDeleteClick: (Mahasiswa) -> Unit = {},
+    onEditClick: (String) -> Unit = {}
 ) {
-    Card (
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row (
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = mahasiswa.nama,
-                    style = MaterialTheme.typography.titleLarge
+    Box(
+        modifier = modifier
+            .padding(4.dp)
+            .clip(RectangleShape)
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(Color(0xFF1A237E), Color(0xFFBA68C8))
                 )
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onDeleteClick(mahasiswa) }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
+            )
+            .padding(2.dp)
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = mahasiswa.nama,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(onClick = { onEditClick(mahasiswa.nim) }) { // Call the edit function
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Kontak"
+                        )
+                    }
+                    IconButton(onClick = { onDeleteClick(mahasiswa) }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Hapus Kontak"
+                        )
+                    }
+                    Text(
+                        text = mahasiswa.nim,
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
                 Text(
-                    text = mahasiswa.nim,
-                    style = MaterialTheme.typography.titleMedium
+                    text = mahasiswa.kelas,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = mahasiswa.alamat,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Text(
-                text = mahasiswa.kelas,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = mahasiswa.alamat,
-                style = MaterialTheme.typography.titleMedium
-            )
         }
     }
 }
+
+
+
+

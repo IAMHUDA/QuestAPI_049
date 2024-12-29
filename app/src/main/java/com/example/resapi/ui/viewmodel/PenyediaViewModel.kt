@@ -8,19 +8,14 @@ import com.example.resapi.MahasiswaApplications
 
 object PenyediaViewModel {
     val Factory = viewModelFactory {
-        initializer {
-            InsertViewModel(
-                aplikasiKontak().container.kontakRepository
-            )
-        }
-
-        initializer {
-            HomeViewModel(
-                aplikasiKontak().container.kontakRepository
-            )
-        }
+        initializer { HomeViewModel(aplikasiKontak().container.kontakRepository) }
+        initializer { InsertViewModel(aplikasiKontak().container.kontakRepository) }
+        initializer { DetailViewModel(aplikasiKontak().container.kontakRepository)}
+        initializer { EditViewModel(aplikasiKontak().container.kontakRepository) }
     }
+
 }
 
 fun CreationExtras.aplikasiKontak(): MahasiswaApplications =
     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MahasiswaApplications)
+

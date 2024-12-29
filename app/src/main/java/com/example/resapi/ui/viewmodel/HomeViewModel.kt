@@ -6,54 +6,50 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.network.HttpException
 import com.example.resapi.model.Mahasiswa
 import com.example.resapi.repository.MahasiswaRepository
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.io.IOException
 
-sealed class HomeuiState{
-    data class Success(
-        val mahasiswa: List<Mahasiswa>
-    ): HomeuiState()
-    object Error: HomeuiState()
-    object Loading: HomeuiState()
+sealed class HomeUiState {
+    data class Success(val mahasiswa: List<Mahasiswa>) : HomeUiState()
+    object Error : HomeUiState()
+    object Loading : HomeUiState()
 }
 
-class HomeViewModel(
-    private val mhs: MahasiswaRepository
-    ): ViewModel()
-    {
-        var mhsUiState: HomeuiState by mutableStateOf(HomeuiState.Loading)
-            private set
+class HomeViewModel (private val mhs: MahasiswaRepository)
+    : ViewModel(){
+    var mhsUiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
+        private set
 
-        init {
-            getMhs()
-        }
-
-        fun getMhs(){
-            viewModelScope.launch {
-                mhsUiState = HomeuiState.Loading
-                mhsUiState = try {
-                    HomeuiState.Success(mhs.getMahasiswa())
-                } catch (e: IOException){
-                    HomeuiState.Error
-                } catch (e: HttpException){
-                    HomeuiState.Error
-                }
-            }
-        }
-
-        fun deleteMhs(nim: String){
-            viewModelScope.launch {
-                try {
-                    mhs.deleteMahasiswa(nim)
-                } catch (e: IOException){
-                    HomeuiState.Error
-                } catch (e: HttpException){
-                    HomeuiState.Error
-                }
-            }
-        }
-
+    init {
+        getMhs()
     }
+
+    fun getMhs() {
+        viewModelScope.launch {
+            mhsUiState = HomeUiState.Loading
+            mhsUiState = try {
+                HomeUiState.Success(mhs.getMahasiswa())
+            } catch (e: IOException) {
+                HomeUiState.Error
+            } catch (e: HttpException) {
+                HomeUiState.Error
+            }
+        }
+    }
+
+    fun deleteMhs(nim: String) {
+        viewModelScope.launch {
+            try {
+                mhs.deleteMahasiswa(nim)
+            } catch (e: IOException) {
+                HomeUiState.Error
+            } catch (e: HttpException) {
+                HomeUiState.Error
+            }
+        }
+    }
+
+}

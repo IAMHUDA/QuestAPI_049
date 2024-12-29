@@ -4,27 +4,28 @@ import com.example.resapi.model.Mahasiswa
 import com.example.resapi.service.MahasiswaService
 import okio.IOException
 
-interface MahasiswaRepository {
+interface MahasiswaRepository{
     suspend fun insertMahasiswa(mahasiswa: Mahasiswa)
+
     suspend fun getMahasiswa(): List<Mahasiswa>
-    suspend fun updateMahasiswa(nim: String,mahasiswa: Mahasiswa)
+
+    suspend fun updateMahasiswa(nim: String, mahasiswa: Mahasiswa)
+
     suspend fun deleteMahasiswa(nim: String)
+
     suspend fun getMahasiswabyNim(nim: String): Mahasiswa
 }
 
+
 class NetworkKontakRepository(
     private val kontakApiService: MahasiswaService
-): MahasiswaRepository{
+): MahasiswaRepository {
     override suspend fun insertMahasiswa(mahasiswa: Mahasiswa) {
         kontakApiService.insertMahasiswa(mahasiswa)
     }
 
     override suspend fun getMahasiswa(): List<Mahasiswa> =
         kontakApiService.getAllMahasiswa()
-
-    override suspend fun getMahasiswabyNim(nim: String): Mahasiswa {
-        return kontakApiService.getAllMahasiswabyNim(nim)
-        }
 
     override suspend fun updateMahasiswa(nim: String, mahasiswa: Mahasiswa) {
         kontakApiService.updateMahasiswa(nim, mahasiswa)
@@ -34,17 +35,18 @@ class NetworkKontakRepository(
         try {
             val response = kontakApiService.deleteMahasiswa(nim)
             if (!response.isSuccessful){
-                throw IOException("fail to delete kontak. http status code :" +
-                "${response.message()}")
+                throw IOException("Failed to delete kontak. HTTP Status code:" + "${(response.code())}")
             }else{
                 response.message()
                 println(response.message())
             }
-        }catch (e:Exception){
+        }
+        catch (e: Exception){
             throw e
         }
     }
 
-
-
+    override suspend fun getMahasiswabyNim(nim: String):Mahasiswa {
+        return kontakApiService.getMahasiswabyNim(nim)
+    }
 }

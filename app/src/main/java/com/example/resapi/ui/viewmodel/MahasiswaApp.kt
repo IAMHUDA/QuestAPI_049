@@ -9,14 +9,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import com.example.resapi.MahasiswaApplications
 import com.example.resapi.ui.navigation.PengelolaHalaman
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MahasiswaApp(
-    modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    // Get the application instance
+    val appContainer = (LocalContext.current.applicationContext as MahasiswaApplications).container
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         //topBar = {TopAppBar(scrollBehavior = scrollBehavior)},
@@ -26,7 +29,7 @@ fun MahasiswaApp(
                 .fillMaxSize()
                 .padding(it)
         ){
-            PengelolaHalaman()
+            PengelolaHalaman(appContainer = appContainer)
         }
     }
 }
