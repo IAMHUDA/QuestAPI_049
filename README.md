@@ -18,6 +18,6 @@
 
 | loading                                 | error loading data                                   |
 |------------------------------------------------|------------------------------------------------|
-|  ![loading data](https://github.com/user-attachments/assets/7ff0083f-6d7a-44f3-8a5a-932c49a030e8) |  ![error_loading_data_mahasiswa](https://github.com/user-attachments/assets/f9fe66f0-2fc0-4bbc-81ad-1f6090767b5b) |
+| ![loading1](https://github.com/user-attachments/assets/2a91d901-0699-406e-bf21-61b2cffc72d8)| ![loading2](https://github.com/user-attachments/assets/9b38c7e8-e421-455f-81c0-3cde201f901f) |
 | **Deskripsi:** Gambar ini menunjukkan kondisi loading pertama, di mana aplikasi sedang memuat data. | **Deskripsi:** Gambar ini menunjukkan kondisi loading kedua, tanda bahwa data tidak dapat di muat  |
 
